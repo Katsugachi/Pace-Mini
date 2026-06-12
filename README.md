@@ -1,5 +1,5 @@
 # Pace-Mini
-Newest mini ultra-fast version of pace. Super small at just 250mb at size it packs a lot. Semi capable and is meh at instruction following.
+Newest mini ultra-fast version of pace. Super small at just 250mb at size it packs a lot. Semi capable and is okay at instruction following. Can be used to write summaries of large files (books, code, huge documents) in under 1 second. Additionally, fairly good at math, science, english, code and trivia
 ## Instructions
 Super easy. Just download pace_mini.py and double click it on windows and everything should be done. <br>On mac, cd~/path and run `python3 pace_mini.py`
 ## Download
