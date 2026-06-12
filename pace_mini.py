@@ -449,29 +449,57 @@ def build_tree():
 # AI context builder
 # ---------------------------------------------------------------------------
 SYSTEM_RULES = """\
-You are Pace Mini, a local AI assistant for one folder on the user's computer.
-You help with files in this folder only: answer questions, summarise content,
-and create or edit files. You are also a fast assistant.
+You are Pace Mini, a helpful, fast, general-purpose AI assistant.
+You run locally on the user's computer. You are powered by the LFM2.5 model.
 
-To create or overwrite a file output EXACTLY this block and nothing else around it:
+CORE BEHAVIOR:
+- You are a GENERAL assistant first. Answer questions on any topic: coding,
+  writing, math, science, trivia, brainstorming, casual conversation, etc.
+- Be natural, conversational, and helpful. Match the user's tone.
+- Do NOT start responses with greetings like "Hi there!" unless appropriate.
+- Give focused, direct answers. Be concise but complete.
+
+WORKSPACE RULES (IMPORTANT):
+- You have OPTIONAL access to the user's workspace folder, but ONLY use it
+  when the user EXPLICITLY asks about files, the folder, or wants to create,
+  read, edit, or work with files.
+- Do NOT mention the workspace, files, or folder unless the user specifically
+  asks about them. Most conversations have nothing to do with files.
+- Do NOT try to create files or use WRITE_FILE unless the user explicitly
+  requests it (e.g., "create a file", "write this to a file", "save this").
+- Never invent files or paths that don't exist.
+
+WORKSPACE CAPABILITY (use ONLY when explicitly requested):
+- The folder name, file list, and some file contents appear at the end of
+  this message for reference.
+- When the user asks about "this folder", "my files", "the workspace", or
+  similar, answer using that information.
+
+To create or overwrite a file (ONLY when the user explicitly asks), output:
 WRITE_FILE: path/relative/to/root
 <<<
 file content here
 >>>
 
-Be concise. Short focused answers only."""
+Remember: Most messages are just conversation. Only use workspace features
+when the user clearly asks for them."""
 
 def build_system_prompt():
     files = walk_workspace()
-    lines = [SYSTEM_RULES, "",
-             f"WORKSPACE: {os.path.basename(ROOT) or ROOT}", "",
-             "FILES (name — size):"]
+    workspace_name = os.path.basename(ROOT) or ROOT
+    lines = [SYSTEM_RULES]
+
+    # Only append workspace info as a quiet reference section at the end
+    ws_lines = ["", "--- WORKSPACE REFERENCE (only use when user asks about files) ---",
+                f"Folder: {workspace_name}",
+                f"Path: {ROOT}",
+                f"Files ({len(files)}):"]
     big, small = [], []
     for rel, size in files:
-        lines.append(f"  {rel} — {human_size(size)}")
+        ws_lines.append(f"  {rel} — {human_size(size)}")
         (small if size <= MAX_FILE_CONTEXT_BYTES else big).append((rel, size))
 
-    budget = MAX_SYSTEM_PROMPT_CHARS - sum(len(l) for l in lines)
+    budget = MAX_SYSTEM_PROMPT_CHARS - sum(len(l) for l in lines) - sum(len(l) for l in ws_lines)
     chunks = []
     for rel, size in small:
         full = os.path.join(ROOT, rel)
@@ -491,11 +519,14 @@ def build_system_prompt():
             break
 
     if chunks:
-        lines += ["", "FILE CONTENTS:"] + chunks
+        ws_lines += ["", "FILE CONTENTS:"] + chunks
     if big:
-        lines += ["", "LARGE FILES (use /read to load): " +
-                  ", ".join(r for r, _ in big)]
+        ws_lines += ["", "LARGE FILES (use /read to load): " +
+                     ", ".join(r for r, _ in big)]
+
+    lines += ws_lines
     return "\n".join(lines)
+
 
 
 # ---------------------------------------------------------------------------
@@ -534,6 +565,21 @@ def apply_write_blocks(text):
 
 
 # ---------------------------------------------------------------------------
+# Detect if user is asking about workspace/files
+# ---------------------------------------------------------------------------
+def is_workspace_query(text):
+    """Check if the user is explicitly asking about files or workspace."""
+    text_lower = text.lower()
+    workspace_keywords = [
+        'file', 'files', 'folder', 'directory', 'workspace', 'project',
+        'create a file', 'write a file', 'save this', 'write to',
+        'read the file', 'show me', 'list files', 'what files',
+        'edit', 'modify', 'update the', 'change the file'
+    ]
+    return any(kw in text_lower for kw in workspace_keywords)
+
+
+# ---------------------------------------------------------------------------
 # Chat — talks to Ollama's OpenAI-compatible /api/chat endpoint
 # ---------------------------------------------------------------------------
 class Chat:
@@ -554,10 +600,19 @@ class Chat:
 
     def ask(self, user_text):
         self._trim()
+        # Only inject workspace hint when the user explicitly asks about files
+        user_content = user_text
+        if is_workspace_query(user_text):
+            workspace_hint = (
+                f"[User is asking about the workspace. Reference the WORKSPACE "
+                f"context from the system message. Folder: {os.path.basename(ROOT) or ROOT}]\n\n"
+            )
+            user_content = workspace_hint + user_text
+        
         messages = (
             [{"role": "system", "content": self.system}]
             + self.history
-            + [{"role": "user", "content": user_text}]
+            + [{"role": "user", "content": user_content}]
         )
         reply = []
         console.print()
