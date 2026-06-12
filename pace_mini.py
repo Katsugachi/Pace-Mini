@@ -61,7 +61,7 @@ def _ollama_asset():
     arm   = mach in ("arm64", "aarch64", "armv8")
     if sys_ == "Windows":
         # Ollama ships a zip for Windows with both arches inside
-        url  = "https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.zip"
+        url  = "https://github.com/Katsugachi/Pace-Mini/releases/download/AMD/ollama-windows-amd64.zip"
         exe  = os.path.join(OLLAMA_DIR, "ollama.exe")
         kind = "zip"
         # ARM64 Windows: still grab amd64 zip — Windows ARM runs x64 via emulation,
