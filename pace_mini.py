@@ -45,8 +45,8 @@ MODEL_LABEL = "LFM2.5-350M"
 # The GGUF file sits right next to the script — easy to see, easy to delete/replace
 MODEL_GGUF_NAME = "LFM2.5-350M-Q4_K_M.gguf"
 MODEL_GGUF_URL  = (
-    "https://huggingface.co/LiquidAI/LFM2.5-350M-GGUF"
-    "/resolve/main/LFM2.5-350M-Q4_K_M.gguf"
+    "https://github.com/Katsugachi/Pace-Mini/releases/download/LFM/"
+    "LFM2.5-350M-Q4_K_M.gguf"
 )
 MODEL_GGUF_PATH = os.path.join(ROOT, MODEL_GGUF_NAME)
 
