@@ -12,14 +12,14 @@ Via Github: [Pace Mini Download](https://github.com/Katsugachi/Pace-Mini/release
 Pace Mini above: Responses after initially loading the model are basically instant. 
 ## Spec Sheet
 
-**Base Model**: LFM 2.5 By Liquid AI
+**Base Model**: LFM 2.5 By Liquid AI <br>
 
-**Parameters**: 350M (~229mb)
+**Parameters**: 350M (~229mb) <br>
 
-<strong>Setup</strong>: 1-2 min (Varies based off device and internet speed)
+**Setup**: 1-2 min (Varies based off device and internet speed) <br>
 
-##### Size: 229mb + 15-20mb.
+**Size**: 229mb + 15-20mb. <br>
 
-##### Speed: 150+ tokens per second (Essentially instant)
+**Speed**: 150+ tokens per second (Essentially instant) <br>
 
-##### RAM & CPU Usage: Negligble (<0.2gb of RAM)
+**RAM & CPU Usage**: Negligble (<0.2gb of RAM)
