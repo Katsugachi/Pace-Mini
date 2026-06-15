@@ -10,6 +10,7 @@ Via Github: [Pace Mini Download](https://github.com/Katsugachi/Pace-Mini/release
 </div>
 <br>
 Pace Mini above: Responses after initially loading the model are basically instant. 
+
 ## Spec Sheet
 
 **Base Model**: LFM 2.5 By Liquid AI <br>
